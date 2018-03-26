@@ -1,15 +1,18 @@
 import React from 'react'
 import xhr from '../../utils/xhr'
-import { Link } from 'react-router-dom'
+import Show from '../show/Show'
 
 class BandPage extends React.Component {
 
   constructor(props) {
     super(props)
     this.state = {
-      shows: []
+      shows: [],
+      filteredShows: [],
+      search: ''
     }
     this.getShows = this.getShows.bind(this)
+    this.handleChangeInDateFilter = this.handleChangeInDateFilter.bind(this)
     console.log("this.props", this.props)
   }
 
@@ -24,25 +27,34 @@ class BandPage extends React.Component {
     xhr.get(`/bands/${id}/shows`).then(response => {
       this.setState({
         shows: response,
+        filteredShows: response
       })
     })
   }
 
+  handleChangeInDateFilter(event) {
+    this.setState({search: event.target.value})
+  }
+
   render() {
-    const { shows } = this.state
-    console.log("foo=" + shows)
+    let filteredShows = this.state.shows.filter(
+      (show) => {
+        return show.showDate.indexOf(this.state.search) !== -1
+      }
+    )
 
     return (
       <div>
+        <input type="text"
+            id="filterDate"
+            value={this.state.search}
+            placeholder="YYYY-MM-DD"
+            onChange={this.handleChangeInDateFilter} />
         <p>Shows</p>
         <ul>
-          {shows.map(show => (
-            <li key={show.showId}>
-              <Link to={`/bands/${show.bandId}/shows/${show.showId}`}>
-                {`${show.title}`}
-              </Link>
-            </li>
-          ))}
+          {filteredShows.map( (show) => {
+            return <Show show={show} key={show.showId} />
+          })}
         </ul>
       </div>
     )
@@ -50,3 +62,14 @@ class BandPage extends React.Component {
 
 }
 export default BandPage
+
+// works
+// <ul>
+//   {shows.map(show => (
+//     <li key={show.showId}>
+//       <Link to={`/bands/${show.bandId}/shows/${show.showId}`}>
+//         {`${show.title}`}
+//       </Link>
+//     </li>
+//   ))}
+// </ul>
